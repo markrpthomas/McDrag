@@ -5,10 +5,10 @@
 <body>
 <h1>McDrag</h1>
 
-<input type="radio" id="calibers" name="units" value="calibers" checked onclick="calibersClicked()">
+<!--<input type="radio" id="calibers" name="units" value="calibers" checked onclick="calibersClicked()">
 <label for="html">Calibers</label><br>
 <input type="radio" id="mm" name="units" value="mm" onclick="mmClicked()">
-<label for="mm">mm</label><br>
+<label for="mm">mm</label><br>-->
 <br>
 <button id="BRL1Button" onclick="BRL1Example()">BRL-1</button>
 <button id="minmanButton" onclick="minmanExample()">Minuteman</button>
@@ -59,16 +59,14 @@
     function mcdrag()
     {
         var conversion = 1;
-        if(document.getElementById("calibers").checked)
+        /*if(document.getElementById("calibers").checked)
         {
             conversion = 1;
         }
         else if(document.getElementById("mm").checked)
         {
             conversion = 3.937007874;
-        }
-
-        console.log(conversion)
+        }*/
 
         // User variables
         var DREF = Number(document.getElementById("DREF").value);
@@ -341,9 +339,9 @@
 
     function BRL1Example()
     {
-        calibersClicked();
-        document.getElementById("calibers").checked = true;
-        document.getElementById("mm").checked = false;
+        //calibersClicked();
+        //document.getElementById("calibers").checked = true;
+        //document.getElementById("mm").checked = false;
         document.getElementById("DREF").value = 5.7;
         document.getElementById("LT").value = 5.480;
         document.getElementById("LN").value = 3.000;
@@ -361,9 +359,9 @@
 
     function minmanExample()
     {
-        calibersClicked();
-        document.getElementById("calibers").checked = true;
-        document.getElementById("mm").checked = false;
+        //calibersClicked();
+        //document.getElementById("calibers").checked = true;
+        //document.getElementById("mm").checked = false;
         document.getElementById("DREF").value = 55.6;
         document.getElementById("LT").value = 3.250;
         document.getElementById("LN").value = 0.967;
@@ -381,9 +379,9 @@
 
     function M549Example()
     {
-        calibersClicked();
-        document.getElementById("calibers").checked = true;
-        document.getElementById("mm").checked = false;
+        //calibersClicked();
+        //document.getElementById("calibers").checked = true;
+        //document.getElementById("mm").checked = false;
         document.getElementById("DREF").value = 155;
         document.getElementById("LT").value = 5.65;
         document.getElementById("LN").value = 3.010;
