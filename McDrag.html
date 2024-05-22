@@ -5,41 +5,46 @@
 <body>
 <h1>McDrag</h1>
 
+<input type="radio" id="calibers" name="units" value="calibers" checked onclick="calibersClicked()">
+<label for="html">Calibers</label><br>
+<input type="radio" id="mm" name="units" value="mm" onclick="mmClicked()">
+<label for="mm">mm</label><br>
+<br>
 <button id="BRL1Button" onclick="BRL1Example()">BRL-1</button>
 <button id="minmanButton" onclick="minmanExample()">Minuteman</button>
 <button id="M549Button" onclick="M549Example()">M549</button>
 <br>
-<input type = "text" id="DREF" name="DREF" value="155">
-<label for "DREF">Bullet diameter (mm)</label>
+<input type = "text" id="DREF" name="DREF" value="155" size="10">
+<label for "DREF" id="DREFLabel">Bullet diameter (mm)</label>
 <br>
-<input type = "text" id="LT" name="LT" value="5.65">
-<label for "LT">Bullet length (calibers)</label>
+<input type = "text" id="LT" name="LT" value="5.65" size="10">
+<label for "LT" id="LTLabel">Bullet length (calibers)</label>
 <br>
-<input type = "text" id="LN" name="LN" value="3.010">
-<label for "LN">Nose length (calibers)</label>
+<input type = "text" id="LN" name="LN" value="3.010" size="10">
+<label for "LN" id="LNLabel">Nose length (calibers)</label>
 <br>
-<input type = "text" id="RTR" name="RTR" value="0.5">
-<label for "RTR">Headshape parameter. 0 for cone, 1 for tangent ogive nose.</label>
+<input type = "text" id="RTR" name="RTR" value="0.5" size="10">
+<label for "RTR" id="RTRLabel">Headshape parameter. 0 for cone, 1 for tangent ogive nose.</label>
 <br>
-<input type = "text" id="LBT" name="LBT" value="0.58">
-<label for "LBT">Boat-tail length (calibers)</label>
+<input type = "text" id="LBT" name="LBT" value="0.58" size="10">
+<label for "LBT" id="LBTLabel">Boat-tail length (calibers)</label>
 <br>
-<input type = "text" id="DB" name="DB" value="0.848">
-<label for "DB">Base diameter (calibers)</label>
+<input type = "text" id="DB" name="DB" value="0.848" size="10">
+<label for "DB" id="DBLabel">Base diameter (calibers)</label>
 <br>
-<input type = "text" id="DM" name="DM" value="0.09">
-<label for "DM">Meplat diameter (calibers)</label>
+<input type = "text" id="DM" name="DM" value="0.09" size="10">
+<label for "DM" id="DMLabel">Meplat diameter (calibers)</label>
 <br>
-<input type = "text" id="DBND" name="DBND" value="1.020">
-<label for "DBND">Rotating band diameter (calibers)</label>
+<input type = "text" id="DBND" name="DBND" value="1.020" size="10">
+<label for "DBND" id="DBNDLabel">Rotating band diameter (calibers)</label>
 <br>
-<input type = "text" id="XCG" name="XCG" value="3.53">
-<label for "XCG">Center of gravity (calibers from nose)</label>
+<input type = "text" id="XCG" name="XCG" value="3.53" size="10">
+<label for "XCG" id="XCGLabel">Center of gravity (calibers from nose)</label>
 <br>
-<input type = "text" id="BLC" name="BLC" value="T/T">
-<label for "BLC">Boundary Layer Code ("L/L" or "L/T" or "T/T")</label>
+<input type = "text" id="BLC" name="BLC" value="T/T" size="10">
+<label for "BLC">Boundary Layer Code ("L/T" or "T/T")</label>
 <br>
-<input type = "text" id="IDENT" name="IDENT" value="M549">
+<input type = "text" id="IDENT" name="IDENT" value="M549" size="10">
 <label for "IDENT">Ident</label>
 <br>
 <br>
@@ -53,16 +58,28 @@
 <script>
     function mcdrag()
     {
+        var conversion = 1;
+        if(document.getElementById("calibers").checked)
+        {
+            conversion = 1;
+        }
+        else if(document.getElementById("mm").checked)
+        {
+            conversion = 3.937007874;
+        }
+
+        console.log(conversion)
+
         // User variables
         var DREF = Number(document.getElementById("DREF").value);
-        var LT = Number(document.getElementById("LT").value);
-        var LN = Number(document.getElementById("LN").value);
-        var RTR = Number(document.getElementById("RTR").value);
-        var LBT = Number(document.getElementById("LBT").value);
-        var DB = Number(document.getElementById("DB").value);
-        var DM = Number(document.getElementById("DM").value);
-        var DBND = Number(document.getElementById("DBND").value);
-        var XCG = Number(document.getElementById("XCG").value);
+        var LT = Number(document.getElementById("LT").value)*conversion;
+        var LN = Number(document.getElementById("LN").value)*conversion;
+        var RTR = Number(document.getElementById("RTR").value)*conversion;
+        var LBT = Number(document.getElementById("LBT").value)*conversion;
+        var DB = Number(document.getElementById("DB").value)*conversion;
+        var DM = Number(document.getElementById("DM").value)*conversion;
+        var DBND = Number(document.getElementById("DBND").value)*conversion;
+        var XCG = Number(document.getElementById("XCG").value)*conversion;
         var BLC = document.getElementById("BLC").value;
         var IDENT = document.getElementById("IDENT").value;
 
@@ -324,6 +341,8 @@
 
     function BRL1Example()
     {
+        document.getElementById("calibers").checked = true;
+        document.getElementById("mm").checked = false;
         document.getElementById("DREF").value = 5.7;
         document.getElementById("LT").value = 5.480;
         document.getElementById("LN").value = 3.000;
@@ -341,6 +360,8 @@
 
     function minmanExample()
     {
+        document.getElementById("calibers").checked = true;
+        document.getElementById("mm").checked = false;
         document.getElementById("DREF").value = 55.6;
         document.getElementById("LT").value = 3.250;
         document.getElementById("LN").value = 0.967;
@@ -358,6 +379,8 @@
 
     function M549Example()
     {
+        document.getElementById("calibers").checked = true;
+        document.getElementById("mm").checked = false;
         document.getElementById("DREF").value = 155;
         document.getElementById("LT").value = 5.65;
         document.getElementById("LN").value = 3.010;
@@ -372,9 +395,58 @@
         
         mcdrag();
     }
+
+    function calibersClicked()
+    {
+        if(document.getElementById("LTLabel").innerHTML == "Bullet length (mm)")
+        {
+            var mm2calibers = 3.937007874;
+            
+            document.getElementById("LTLabel").innerHTML = "Bullet length (calibers)";
+            document.getElementById("LNLabel").innerHTML = "Nose length (calibers)";
+            document.getElementById("LBTLabel").innerHTML = "Boat-tail length (calibers)";
+            document.getElementById("DBLabel").innerHTML = "Base diameter (calibers)";
+            document.getElementById("DMLabel").innerHTML = "Meplat diameter (calibers)";
+            document.getElementById("DBNDLabel").innerHTML = "Rotating band diameter (calibers)";
+            document.getElementById("XCGLabel").innerHTML = "Center of gravity (calibers from nose)";
+
+            document.getElementById("LT").value *= mm2calibers;
+            document.getElementById("LN").value *= mm2calibers;
+            document.getElementById("RTR").value *= mm2calibers;
+            document.getElementById("LBT").value *= mm2calibers;
+            document.getElementById("DB").value *= mm2calibers;
+            document.getElementById("DM").value *= mm2calibers;
+            document.getElementById("DBND").value *= mm2calibers;
+            document.getElementById("XCG").value *= mm2calibers;
+        }
+    }
+
+    function mmClicked()
+    {
+        if(document.getElementById("LTLabel").innerHTML == "Bullet length (calibers)")
+        {
+            var mm2calibers = 3.937007874;
+
+            document.getElementById("LTLabel").innerHTML = "Bullet length (mm)";
+            document.getElementById("LNLabel").innerHTML = "Nose length (mm)";
+            document.getElementById("LBTLabel").innerHTML = "Boat-tail length (mm)";
+            document.getElementById("DBLabel").innerHTML = "Base diameter (mm)";
+            document.getElementById("DMLabel").innerHTML = "Meplat diameter (mm)";
+            document.getElementById("DBNDLabel").innerHTML = "Rotating band diameter (mm)";
+            document.getElementById("XCGLabel").innerHTML = "Center of gravity (mm from nose)";
+
+            document.getElementById("LT").value /= mm2calibers;
+            document.getElementById("LN").value /= mm2calibers;
+            document.getElementById("RTR").value /= mm2calibers;
+            document.getElementById("LBT").value /= mm2calibers;
+            document.getElementById("DB").value /= mm2calibers;
+            document.getElementById("DM").value /= mm2calibers;
+            document.getElementById("DBND").value /= mm2calibers;
+            document.getElementById("XCG").value /= mm2calibers;
+        }
+    }
 </script>
 
 </body>
-
 
 </html>
