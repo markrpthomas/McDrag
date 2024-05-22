@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<body>
+<h1>McDrag</h1>
+
+<button id="BRL1Button" onclick="BRL1Example()">BRL-1</button>
+<button id="minmanButton" onclick="minmanExample()">Minuteman</button>
+<button id="M549Button" onclick="M549Example()">M549</button>
+<br>
+<input type = "text" id="DREF" name="DREF" value="155">
+<label for "DREF">Bullet diameter (mm)</label>
+<br>
+<input type = "text" id="LT" name="LT" value="5.65">
+<label for "LT">Bullet length (calibers)</label>
+<br>
+<input type = "text" id="LN" name="LN" value="3.010">
+<label for "LN">Nose length (calibers)</label>
+<br>
+<input type = "text" id="RTR" name="RTR" value="0.5">
+<label for "RTR">Headshape parameter. 0 for cone, 1 for tangent ogive nose.</label>
+<br>
+<input type = "text" id="LBT" name="LBT" value="0.58">
+<label for "LBT">Boat-tail length (calibers)</label>
+<br>
+<input type = "text" id="DB" name="DB" value="0.848">
+<label for "DB">Base diameter (calibers)</label>
+<br>
+<input type = "text" id="DM" name="DM" value="0.09">
+<label for "DM">Meplat diameter (calibers)</label>
+<br>
+<input type = "text" id="DBND" name="DBND" value="1.020">
+<label for "DBND">Rotating band diameter (calibers)</label>
+<br>
+<input type = "text" id="XCG" name="XCG" value="3.53">
+<label for "XCG">Center of gravity (calibers from nose)</label>
+<br>
+<input type = "text" id="BLC" name="BLC" value="T/T">
+<label for "BLC">Boundary Layer Code ("L/L" or "L/T" or "T/T")</label>
+<br>
+<input type = "text" id="IDENT" name="IDENT" value="M549">
+<label for "IDENT">Ident</label>
+<br>
+<br>
+<button id="calcButton" onclick="mcdrag()">Calculate</button>
+
+<div style="display: flex">
+    <p id="table"></p>
+    <div id="plotdiv"></div>
+</div>
+
+<script>
+    function mcdrag()
+    {
+        // User variables
+        var DREF = Number(document.getElementById("DREF").value);
+        var LT = Number(document.getElementById("LT").value);
+        var LN = Number(document.getElementById("LN").value);
+        var RTR = Number(document.getElementById("RTR").value);
+        var LBT = Number(document.getElementById("LBT").value);
+        var DB = Number(document.getElementById("DB").value);
+        var DM = Number(document.getElementById("DM").value);
+        var DBND = Number(document.getElementById("DBND").value);
+        var XCG = Number(document.getElementById("XCG").value);
+        var BLC = document.getElementById("BLC").value;
+        var IDENT = document.getElementById("IDENT").value;
+
+        // Mach numbers
+        var M = [0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.925, 0.95, 0.975, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2, 2.2, 2.5, 3.0, 3.5, 4.0];
+        
+        // Outputs
+        var CD0 = new Array(M.length).fill(0);
+        var CDH = new Array(M.length).fill(0);
+        var CDSF = new Array(M.length).fill(0);
+        var CDBND = new Array(M.length).fill(0);
+        var CDBT = new Array(M.length).fill(0);
+        var CDB = new Array(M.length).fill(0);
+        var PBP1 = new Array(M.length).fill(0);
+
+        // Intermediates
+        var TB;
+        var BBT;
+
+        document.getElementById("table").innerHTML = "M\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0" +
+                                                      "CD0\xa0\xa0\xa0\xa0\xa0\xa0\xa0" +
+                                                      "CDH\xa0\xa0\xa0\xa0\xa0\xa0" + 
+                                                      "CDSF\xa0\xa0\xa0\xa0\xa0" +
+                                                      "CDBND\xa0\xa0" +
+                                                      "CDBT\xa0\xa0\xa0\xa0\xa0" + 
+                                                      "CDB\xa0\xa0\xa0\xa0\xa0\xa0" + 
+                                                      "PB/P1<br>"
+        for(let ii=0; ii<M.length; ii++)
+        {
+            TA = (1-DM)/LN;
+            M2 = M[ii]**2;
+            
+            RE = 23296.3*M[ii]*LT*DREF;
+            RET = 0.4343 * Math.log(RE);
+            CFT = (0.455/(RET**2.58))*((1 + 0.21*M2)**(-0.32));
+            DUM = 1 + ((0.333 + (0.02/(LN**2)))*RTR);
+            SWM = 1.5708*LN*DUM*(1 + 1/(8*LN**2));
+            SWCYL = 3.1416 * (LT-LN);
+            SW = SWM+SWCYL;
+            if(BLC.localeCompare("L/T")==0)
+            {
+                CFL=(1.328/(Math.sqrt(RE))) * ((1+0.12*M2)**(-0.12));
+            }
+            if(BLC.localeCompare("T/T")==0)
+            {
+                CFL = CFT;
+            }
+            
+            CDSFL = 1.2732*SW*CFL;
+            CDSFT = 1.2732*SW*CFT;
+            CDSF[ii] = (CDSFL * SWM + CDSFT * SWCYL)/SW;
+            
+            CHI = (M2-1)/(2.4*M2);
+            
+            if(M[ii]<=1)
+            {
+                PTP = (1+0.2*M2)**3.5;
+            }
+            if(M[ii] > 1)
+            {
+                PTP = ((1.2*M2)**3.5)*((6/(7*M2-1))**2.5);
+            }
+            CMEP = (1.122*(PTP-1)*(DM**2))/M2;
+            
+            if(M[ii] <= 0.91)
+            {
+                CDHM = 0;
+            }
+            if(M[ii] >= 1.41)
+            {
+                CDHM = 0.85 * CMEP;
+            }
+            if(M[ii] > 0.91 && M[ii] < 1.41)
+            {
+                CDHM = (0.254+2.88*CHI)*CMEP;
+            }
+            
+            if(M[ii] < 1)
+            {
+                PB2 = 1/(1 + 0.1875*M2 + 0.0531*M2**2);
+            }
+            if(M[ii] >= 1)
+            {
+                PB2 = 1/(1 + 0.2477*M2 + 0.0345*M2**2);
+            }
+            
+            PB4 = (1 + 0.09*M2*(1-Math.exp(LN-LT)))*(1+ 0.25*M2*(1-DB));
+            PBP1[ii] = PB2*PB4;
+            CDB[ii] = (1.4286*(1-PBP1[ii])*DB**2)/M2;
+            
+            if(M[ii]<0.95)
+            {
+                CDBND[ii] = (M[ii]**12.5)*(DBND-1);
+            }
+            if(M[ii] >= 0.95)
+            {
+                CDBND[ii] = (0.21+0.28/M2)*(DBND-1);
+            }
+            
+            if(M[ii]<=1)
+            {
+                // Subsonic and transonic speeds
+                if(LBT <=0)
+                {
+                    CDBT[ii] = 0;
+                }
+                else
+                {
+                    if(M[ii] <= 0.85)
+                    {
+                        CDBT[ii] = 0;
+                    }
+                    else
+                    {
+                        TB = (1-DB)/(2*LBT);
+                        TB23 = 2*TB**2 + TB**3;
+                        EBT = Math.exp(-2*LBT);
+                        BBT = 1- EBT +2*TB*((EBT*(LBT+0.5)) - 0.5);
+                        CDBT[ii] = 2*TB23 *BBT*(1/(0.564 + 1250*CHI**2));
+                    }
+                }
+                XMC =  1/Math.sqrt(1+ 0.552*TA**0.8);
+                if(M[ii] <= XMC)
+                {
+                    CDHT = 0;
+                }
+                else
+                {
+                    CDHT = 0.368 * (TA**1.8) + 1.6 * TA * CHI;
+                }
+            }
+            else
+            {
+                //Supersonic speeds
+                BE2 = M2 - 1;
+                BE = Math.sqrt(BE2);
+                ZE = BE;
+                SSMC = 1+ 0.368 * (TA**1.85);
+                if(M[ii] < SSMC)
+                {
+                    ZE = Math.sqrt(SSMC**2-1);
+                }
+                
+                C1 = 0.7156 - 0.5313*RTR + 0.595*RTR**2;
+                C2 = 0.0796+0.0779*RTR;
+                C3 = 1.587 + 0.049*RTR;
+                C4 = 0.1122 + 0.1658*RTR;
+                RZ2 = 1./ZE**2;
+                
+                CDHT = (C1 - C2*TA**2)*RZ2*((TA*ZE)**(C3+C4*TA));
+                
+                if(LBT > 0)
+                {
+                    TB = (1-DB)/(2*LBT);
+                    if(M[ii]<=1.1)
+                    {
+                        TB23=2*TB**2+TB**3;
+                        EBT=Math.exp(-2*LBT);
+                        BBT = 1 - EBT + 2*TB*(EBT*(LBT+0.5)-0.5);
+                        CDBT[ii] = 2*TB23*BBT*(1.774-9.3*CHI);
+                    }
+                    if(M[ii] > 1.1)
+                    {
+                        BB = 0.85 / BE;
+                        AA2 = (5 * TA)/(6*BE) + (0.5*TA)**2 - (0.7435 / M2) * ((TA*M[ii])**1.6);
+                        AA1 = (1 - ((0.6*RTR)/ M[ii])) * AA2;
+                        EXL = Math.exp(((-1.1952)/ M[ii]) * (LT - LN -LBT));
+                        XXM = ((2.4 * M2**2 - 4*BE2) * (TB**2)) / (2*BE2**2);
+                        AA = AA1 * EXL - XXM + ((2*TB)/ BE);
+                        RB = 1/BB;
+                        EXBT = Math.exp((-BB)*LBT);
+                        AAB = 1 - EXBT + (2*TB * (EXBT * (LBT + RB) - RB));
+                        CDBT[ii] = 4 * AA * TB * AAB * RB;
+                    }
+                }
+                else
+                {
+                    CDBT[ii] = 0;
+                }
+            }
+            
+            CDH[ii] = CDHT + CDHM;
+            
+            CD0[ii] = CDH[ii] + CDSF[ii] + CDBND[ii] + CDBT[ii] + CDB[ii];    
+
+            document.getElementById("table").innerHTML += M[ii].toFixed(2) + "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(CD0[ii] * 1000) / 1000).toFixed(3) +
+                                                                              "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(CDH[ii] * 1000) / 1000).toFixed(3) +
+                                                                              "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(CDSF[ii] * 1000) / 1000).toFixed(3) +
+                                                                              "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(CDBND[ii] * 1000) / 1000).toFixed(3) +
+                                                                              "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(CDBT[ii] * 1000) / 1000).toFixed(3) + 
+                                                                              "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(CDB[ii] * 1000) / 1000).toFixed(3) +
+                                                                              "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(PBP1[ii] * 1000) / 1000).toFixed(3) 
+            document.getElementById("table").innerHTML += "<br>"
+        }
+
+        var trace1 = {
+            x: M,
+            y: CD0,
+            type: 'scatter',
+            name: 'Total CD'
+        };
+
+        var trace2 = {
+            x: M,
+            y: CDH,
+            type: 'scatter',
+            name: 'Head'
+        };
+
+        var trace3 = {
+            x: M,
+            y: CDSF,
+            type: 'scatter',
+            name: 'Skin Friction'
+        };
+
+        var trace4 = {
+            x: M,
+            y: CDBND,
+            type: 'scatter',
+            name: 'Rotating Band'
+        };
+
+        var trace5 = {
+            x: M,
+            y: CDBT,
+            type: 'scatter',
+            name: 'Boattail'
+        };
+
+        var trace6 = {
+            x: M,
+            y: CDB,
+            type: 'scatter',
+            name: 'Blunt Base'
+        };
+
+        var data = [trace1, trace2, trace3, trace4, trace5, trace6];
+
+        var layout = {
+        title: {
+            text:IDENT,
+        },
+        xaxis: {
+            title: {
+            text: 'Mach Number'
+            },
+        },
+        yaxis: {
+            title: {
+            text: 'Drag Coefficient'
+            }
+        }
+        };
+
+        Plotly.newPlot('plotdiv', data, layout);
+
+    }
+
+    function BRL1Example()
+    {
+        document.getElementById("DREF").value = 5.7;
+        document.getElementById("LT").value = 5.480;
+        document.getElementById("LN").value = 3.000;
+        document.getElementById("RTR").value = 0.50;
+        document.getElementById("LBT").value = 1.000;
+        document.getElementById("DB").value = 0.754;
+        document.getElementById("DM").value = 0.000;
+        document.getElementById("DBND").value = 1.000;
+        document.getElementById("XCG").value = 3.34;
+        document.getElementById("BLC").value = "L/T";
+        document.getElementById("IDENT").value = "BRL-1";
+        
+        mcdrag();  
+    }
+
+    function minmanExample()
+    {
+        document.getElementById("DREF").value = 55.6;
+        document.getElementById("LT").value = 3.250;
+        document.getElementById("LN").value = 0.967;
+        document.getElementById("RTR").value = 0.00;
+        document.getElementById("LBT").value = 1.180;
+        document.getElementById("DB").value = 1.630;
+        document.getElementById("DM").value = 0.200;
+        document.getElementById("DBND").value = 1.000;
+        document.getElementById("XCG").value = 1.76;
+        document.getElementById("BLC").value = "T/T";
+        document.getElementById("IDENT").value = "Minuteman";
+
+        mcdrag();
+    }
+
+    function M549Example()
+    {
+        document.getElementById("DREF").value = 155;
+        document.getElementById("LT").value = 5.65;
+        document.getElementById("LN").value = 3.010;
+        document.getElementById("RTR").value = 0.5;
+        document.getElementById("LBT").value = 0.58;
+        document.getElementById("DB").value = 0.848;
+        document.getElementById("DM").value = 0.09;
+        document.getElementById("DBND").value = 1.020;
+        document.getElementById("XCG").value = 3.53;
+        document.getElementById("BLC").value = "T/T";
+        document.getElementById("IDENT").value = "M549";
+        
+        mcdrag();
+    }
+</script>
+
+</body>
+
+
+</html>
