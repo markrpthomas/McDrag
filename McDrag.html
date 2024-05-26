@@ -19,6 +19,7 @@
 <button id="BRL1Button" onclick="BRL1Example()">BRL-1</button>
 <button id="minmanButton" onclick="minmanExample()">Minuteman</button>
 <button id="M549Button" onclick="M549Example()">M549</button>
+<button id="Lap338250_T" onclick="Lap338250_T()">Lap338250T</button>
 <br>
 <input type = "text" id="DREF_field" name="DREF_field" value="155" size="10">
 <label for "DREF_field" id="DREFLabel">Bullet diameter (mm)</label>
@@ -577,6 +578,26 @@
         document.getElementById("XCG_field").value = 3.53;
         document.getElementById("BLC_field").value = "T/T";
         document.getElementById("IDENT_field").value = "M549";
+        
+        updateVarsFromFields();
+        updateSlidersFromFields();
+        mcdrag();
+    }
+
+    function Lap338250_T()
+    {
+        updateVarsFromFields();
+        document.getElementById("DREF_field").value = 8.59;
+        document.getElementById("LT_field").value = 5.30;
+        document.getElementById("LN_field").value = 2.74;
+        document.getElementById("RTR_field").value = 0.93;
+        document.getElementById("LBT_field").value = 0.35;
+        document.getElementById("DB_field").value = 0.910;
+        document.getElementById("DM_field").value = 0.05;
+        document.getElementById("DBND_field").value = 1.0;
+        document.getElementById("XCG_field").value = 3.26;
+        document.getElementById("BLC_field").value = "L/T";
+        document.getElementById("IDENT_field").value = "Lap-338-250-CAWT";
         
         updateVarsFromFields();
         updateSlidersFromFields();
