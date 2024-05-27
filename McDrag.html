@@ -29,7 +29,7 @@
 <label for "LT_field" id="LTLabel">Bullet length (calibers)</label>
 <input type="range" id="LT_slider" name="LT_slider" step = "0.01" min="0" max="10" value="0">
 <br>
-<input type = "text" id="LN_field" name="LN_field" value="3.010" size="10">
+<input type = "text" id="LN_field" name="LN_field" value="3.01" size="10">
 <label for "LN_field" id="LNLabel">Nose length (calibers)</label>
 <input type="range" id="LN_slider" name="LN_slider" step = "0.01" min="0" max="5" value="0">
 <br>
@@ -49,7 +49,7 @@
 <label for "DM_field" id="DMLabel">Meplat diameter (calibers)</label>
 <input type="range" id="DM_slider" name="DM_slider" step = "0.01" min="0" max="2" value="0">
 <br>
-<input type = "text" id="DBND_field" name="DBND_field" value="1.020" size="10">
+<input type = "text" id="DBND_field" name="DBND_field" value="1.02" size="10">
 <label for "DBND_field" id="DBNDLabel">Rotating band diameter (calibers)</label>
 <input type="range" id="DBND_slider" name="DBND_slider" step = "0.01" min="0" max="2" value="0">
 <br>
@@ -60,7 +60,7 @@
 <input type = "text" id="BLC_field" name="BLC_field" value="T/T" size="10">
 <label for "BLC_field">Boundary Layer Code ("L/T" or "T/T")</label>
 <br>
-<input type = "text" id="IDENT_field" name="IDENT_field" value="" size="10">
+<input type = "text" id="IDENT_field" name="IDENT_field" value="M549" size="10">
 <label for "IDENT_field">Ident</label>
 <br>
 <br>
@@ -139,6 +139,7 @@
 
     var data = [CD0_trace, CDH_trace, CDSF_trace, CDBND_trace, CDBT_trace, CDB_trace];
 
+    console.log(IDENT)
     var layout = {
         title: {
             text:IDENT,
@@ -522,8 +523,11 @@
             document.getElementById("table").innerHTML += "<br>"
         }
 
+        var update = {
+            title: IDENT
+        };
+        Plotly.relayout(plotdiv, update);
         Plotly.redraw(plotdiv);
-
     }
 
     function BRL1Example()
