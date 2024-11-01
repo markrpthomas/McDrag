@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html>
+<style>
+    .tablecolumn {
+    float: left;
+    width: 35%;
+  }
+  .plotcolumn {
+    float: left;
+    width: 65%;
+  }
+</style>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<body onload="loadFunction()">
+<h2><img src="PALO TECH LOGO.png" alt=""style="width:500px; height:100px;"> </h2>
+
+<br>
+<button id="BRL1Button" onclick="BRL1Example()">BRL-1</button>
+<button id="minmanButton" onclick="minmanExample()">Minuteman</button>
+<button id="M549Button" onclick="M549Example()">M549</button>
+<button id="Lap338250_T" onclick="Lap338250_T()">Lap338250T</button>
+<br>
+<input type = "text" id="DREF_field" name="DREF_field" value="155" size="10">
+<label for "DREF_field" id="DREFLabel">Bullet diameter (mm)</label>
+<input type="range" id="DREF_slider" name="DREF_slider" step = "0.01" min="0" max="200" value="0">
+<br>
+<input type = "text" id="LT_field" name="LT_field" value="5.65" size="10">
+<label for "LT_field" id="LTLabel">Bullet length (calibers)</label>
+<input type="range" id="LT_slider" name="LT_slider" step = "0.01" min="0" max="10" value="0">
+<br>
+<input type = "text" id="LN_field" name="LN_field" value="3.01" size="10">
+<label for "LN_field" id="LNLabel">Nose length (calibers)</label>
+<input type="range" id="LN_slider" name="LN_slider" step = "0.01" min="0" max="5" value="0">
+<br>
+<input type = "text" id="RTR_field" name="RTR_field" value="0.5" size="10">
+<label for "RTR_field" id="RTRLabel">Headshape parameter. 0 for cone, 1 for tangent ogive nose.</label>
+<input type="range" id="RTR_slider" name="RTR_slider" step = "0.01" min="0" max="1" value="0">
+<br>
+<input type = "text" id="LBT_field" name="LBT_field" value="0.58" size="10">
+<label for "LBT_field" id="LBTLabel">Boat-tail length (calibers)</label>
+<input type="range" id="LBT_slider" name="LBT_slider" step = "0.01" min="0" max="2" value="0">
+<br>
+<input type = "text" id="DB_field" name="DB_field" value="0.848" size="10">
+<label for "DB_field" id="DBLabel">Base diameter (calibers)</label>
+<input type="range" id="DB_slider" name="DB_slider" step = "0.01" min="0" max="2" value="0">
+<br>
+<input type = "text" id="DM_field" name="DM_field" value="0.09" size="10">
+<label for "DM_field" id="DMLabel">Meplat diameter (calibers)</label>
+<input type="range" id="DM_slider" name="DM_slider" step = "0.01" min="0" max="2" value="0">
+<br>
+<input type = "text" id="DBND_field" name="DBND_field" value="1.02" size="10">
+<label for "DBND_field" id="DBNDLabel">Rotating band diameter (calibers)</label>
+<input type="range" id="DBND_slider" name="DBND_slider" step = "0.01" min="0" max="2" value="0">
+<br>
+<input type = "text" id="XCG_field" name="XCG_field" value="3.53" size="10">
+<label for "XCG_field" id="XCGLabel">Center of gravity (calibers from nose)</label>
+<input type="range" id="XCG_slider" name="XCG_slider" step = "0.01" min="0" max="5" value="0">
+<br>
+<input type = "text" id="BLC_field" name="BLC_field" value="T/T" size="10">
+<label for "BLC_field">Boundary Layer Code ("L/T" or "T/T")</label>
+<br>
+<input type = "text" id="IDENT_field" name="IDENT_field" value="M549" size="10">
+<label for "IDENT_field">Ident</label>
+<br>
+<br>
+<input type = "text" id="WEIGHT_field" name="WEIGHT_field" value="250" size="10" on>
+<label for "IDENT_field">Weight</label>
+<input type="range" id="WEIGHT_slider" name="WEIGHT_slider" step = "1" min="0" max="1000" value="250">
+<br>
+<br>
+<br>
+
+<div>
+    <div class="tablecolumn">
+        <p id="table"></p>
+    </div>
+    <div id="plotdiv" class="plotcolumn"></div>
+</div>
+<div style="clear:both;"></div>
+<div>
+    <div class="tablecolumn2">
+        <p id="table2"></p>
+    </div>
+</div>
+<br><br>
+
+<script>
+    var M = [0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.925, 0.95, 0.975, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2, 2.2, 2.5, 3.0, 3.5, 4.0];
+
+
+    var M1 = [ 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 2, 2.2, 2.5, 3.0, 3.5, 4.0];
+    var G1_CD = [0.203, 0.203, 0.217, 0.255, 0.342, 0.408, 0.481, 0.588, 0.639, 0.659, 0.663, 0.657, 0.647, 0.621, 0.593, 0.569, 0.540, 0.513, 0.504, 0.501];
+    var G7_CD = [0.119, 0.119, 0.120, 0.124, 0.146, 0.205, 0.380, 0.401, 0.388, 0.373, 0.358, 0.344, 0.332, 0.312, 0.298, 0.286, 0.270, 0.242, 0.215, 0.194];
+    var CD0_calc=[];
+
+    var DREF = Number(document.getElementById("DREF_field").value);
+    var LT = Number(document.getElementById("LT_field").value);
+    var LN = Number(document.getElementById("LN_field").value);
+    var RTR = Number(document.getElementById("RTR_field").value);
+    var LBT = Number(document.getElementById("LBT_field").value);
+    var DB = Number(document.getElementById("DB_field").value);
+    var DM = Number(document.getElementById("DM_field").value);
+    var DBND = Number(document.getElementById("DBND_field").value);
+    var XCG = Number(document.getElementById("XCG_field").value);
+    var BLC = document.getElementById("BLC_field").value;
+    var IDENT = document.getElementById("IDENT_field").value;
+
+    var WEIGHT= document.getElementById("WEIGHT_field").value;
+
+    var CD0 = new Array(M.length).fill(0.5);
+    var CDH = new Array(M.length).fill(0);
+    var CDSF = new Array(M.length).fill(0);
+    var CDBND = new Array(M.length).fill(0);
+    var CDBT = new Array(M.length).fill(0);
+    var CDB = new Array(M.length).fill(0);
+    var PBP1 = new Array(M.length).fill(0);
+
+    var CD0_trace = {
+        x: M,
+        y: CD0,
+        type: 'scatter',
+        name: 'Total CD'
+    };
+
+    var CDH_trace = {
+        x: M,
+        y: CDH,
+        type: 'scatter',
+        name: 'Head'
+    };
+
+    var CDSF_trace = {
+        x: M,
+        y: CDSF,
+        type: 'scatter',
+        name: 'Skin Friction'
+    };
+
+    var CDBND_trace = {
+        x: M,
+        y: CDBND,
+        type: 'scatter',
+        name: 'Rotating Band'
+    };
+
+    var CDBT_trace = {
+        x: M,
+        y: CDBT,
+        type: 'scatter',
+        name: 'Boattail'
+    };
+
+    var CDB_trace = {
+        x: M,
+        y: CDB,
+        type: 'scatter',
+        name: 'Blunt Base'
+    };
+
+    var data = [CD0_trace, CDH_trace, CDSF_trace, CDBND_trace, CDBT_trace, CDB_trace];
+
+    console.log(IDENT)
+    var layout = {
+        title: {
+            text:IDENT,
+        },
+        xaxis: {
+            title: {
+            text: 'Mach Number'
+            },
+        },
+        yaxis: {
+            title: {
+            autorange: false,
+            text: 'Drag Coefficient',
+            range: [0, 0.5]
+            }
+        }
+    };
+
+    function loadFunction()
+    {
+        updateSlidersFromFields();
+        Plotly.newPlot('plotdiv', data, layout);
+        mcdrag();
+    }
+
+    // Field callbacks
+    DREF_field = document.getElementById("DREF_field");
+    DREF_field.oninput = function()
+    {
+        DREF = Number(DREF_field.value);
+        document.getElementById("DREF_slider").value = DREF_field.value;
+        mcdrag();
+    }
+
+    LT_field = document.getElementById("LT_field");
+    LT_field.oninput = function()
+    {
+        LT = Number(LT_field.value);
+        document.getElementById("LT_slider").value = LT_field.value;
+        mcdrag();
+    }
+
+    LN_field = document.getElementById("LN_field");
+    LN_field.oninput = function()
+    {
+        LN = Number(LN_field.value);
+        document.getElementById("LN_slider").value = LN_field.value;
+        mcdrag();
+    }
+
+    RTR_field = document.getElementById("RTR_field");
+    RTR_field.oninput = function()
+    {
+        RTR = Number(RTR_field.value);
+        document.getElementById("RTR_slider").value = RTR_field.value;
+        mcdrag();
+    }
+
+    LBT_field = document.getElementById("LBT_field");
+    LBT_field.oninput = function()
+    {
+        LBT = Number(LBT_field.value);
+        document.getElementById("LBT_slider").value = LBT_field.value;
+        mcdrag();
+    }
+
+    DB_field = document.getElementById("DB_field");
+    DB_field.oninput = function()
+    {
+        DB = Number(DB_field.value);
+        document.getElementById("DB_slider").value = DB_field.value;
+        mcdrag();
+    }
+
+    DM_field = document.getElementById("DM_field");
+    DM_field.oninput = function()
+    {
+        DM = Number(DM_field.value);
+        document.getElementById("DM_slider").value = DM_field.value;
+        mcdrag();
+    }
+
+    DBND_field = document.getElementById("DBND_field");
+    DBND_field.oninput = function()
+    {
+        DBND = Number(DBND_field.value);
+        document.getElementById("DBND_slider").value = DBND_field.value;
+        mcdrag();
+    }
+
+    XCG_field = document.getElementById("XCG_field");
+    XCG_field.oninput = function()
+    {
+        XCG = Number(XCG_field.value);
+        document.getElementById("XCG_slider").value = XCG_field.value;
+        mcdrag();
+    }
+
+    WEIGHT_field = document.getElementById("WEIGHT_field");
+    WEIGHT_field.oninput = function()
+    {
+        WEIGHT = Number(WEIGHT_field.value);
+        document.getElementById("WEIGHT_slider").value = WEIGHT_field.value;
+        mcdrag();
+    }
+
+    // Slider callbacks
+    DREF_slider = document.getElementById("DREF_slider");
+    DREF_slider.oninput = function()
+    {
+        DREF = Number(DREF_slider.value);
+        document.getElementById("DREF_field").value = DREF_slider.value;
+        mcdrag();
+    }
+
+    LT_slider = document.getElementById("LT_slider");
+    LT_slider.oninput = function()
+    {
+        LT = Number(LT_slider.value);
+        document.getElementById("LT_field").value = LT_slider.value;
+        mcdrag();
+    }
+
+    LN_slider = document.getElementById("LN_slider");
+    LN_slider.oninput = function()
+    {
+        LN = Number(LN_slider.value);
+        document.getElementById("LN_field").value = LN_slider.value;
+        mcdrag();
+    }
+
+    RTR_slider = document.getElementById("RTR_slider");
+    RTR_slider.oninput = function()
+    {
+        RTR = Number(RTR_slider.value);
+        document.getElementById("RTR_field").value = RTR_slider.value;
+        mcdrag();
+    }
+
+    LBT_slider = document.getElementById("LBT_slider");
+    LBT_slider.oninput = function()
+    {
+        LBT = Number(LBT_slider.value);
+        document.getElementById("LBT_field").value = LBT_slider.value;
+        mcdrag();
+    }
+
+    DB_slider = document.getElementById("DB_slider");
+    DB_slider.oninput = function()
+    {
+        DB = Number(DB_slider.value);
+        document.getElementById("DB_field").value = DB_slider.value;
+        mcdrag();
+    }
+
+    DM_slider = document.getElementById("DM_slider");
+    DM_slider.oninput = function()
+    {
+        DM = Number(DM_slider.value);
+        document.getElementById("DM_field").value = DM_slider.value;
+        mcdrag();
+    }
+
+    DBND_slider = document.getElementById("DBND_slider");
+    DBND_slider.oninput = function()
+    {
+        DBND = Number(DBND_slider.value);
+        document.getElementById("DBND_field").value = DBND_slider.value;
+        mcdrag();
+    }
+
+    XCG_slider = document.getElementById("XCG_slider");
+    XCG_slider.oninput = function()
+    {
+        XCG = Number(XCG_slider.value);
+        document.getElementById("XCG_field").value = XCG_slider.value;
+        mcdrag();
+    }
+
+    WEIGHT_slider = document.getElementById("WEIGHT_slider");
+    WEIGHT_slider.oninput = function()
+    {
+        WEIGHT = Number(WEIGHT_slider.value);
+        document.getElementById("WEIGHT_field").value = WEIGHT_slider.value;
+        bc();
+    }
+
+    function updateVarsFromFields()
+    {
+        DREF = Number(document.getElementById("DREF_field").value);
+        LT = Number(document.getElementById("LT_field").value);
+        LN = Number(document.getElementById("LN_field").value);
+        RTR = Number(document.getElementById("RTR_field").value);
+        LBT = Number(document.getElementById("LBT_field").value);
+        DB = Number(document.getElementById("DB_field").value);
+        DM = Number(document.getElementById("DM_field").value);
+        DBND = Number(document.getElementById("DBND_field").value);
+        XCG = Number(document.getElementById("XCG_field").value);
+        BLC = document.getElementById("BLC_field").value;
+        IDENT = document.getElementById("IDENT_field").value;
+    }
+
+    function updateSlidersFromFields()
+    {
+        document.getElementById("DREF_slider").value = document.getElementById("DREF_field").value;
+        document.getElementById("LT_slider").value = document.getElementById("LT_field").value;
+        document.getElementById("LN_slider").value = document.getElementById("LN_field").value;
+        document.getElementById("RTR_slider").value = document.getElementById("RTR_field").value;
+        document.getElementById("LBT_slider").value = document.getElementById("LBT_field").value;
+        document.getElementById("DB_slider").value = document.getElementById("DB_field").value;
+        document.getElementById("DM_slider").value = document.getElementById("DM_field").value;
+        document.getElementById("DBND_slider").value = document.getElementById("DBND_field").value;
+        document.getElementById("XCG_slider").value = document.getElementById("XCG_field").value;
+    }
+
+    function mcdrag()
+    {
+
+        CD0_calc=[];
+        // Intermediates
+        const TA = (1-DM)/LN;
+
+        const C1 = 0.7156 - 0.5313*RTR + 0.595*RTR**2;
+        const C2 = 0.0796+0.0779*RTR;
+        const C3 = 1.587 + 0.049*RTR;
+        const C4 = 0.1122 + 0.1658*RTR;
+
+        const TB = (1-DB)/(2*LBT);
+        const TB23 = 2*TB**2 + TB**3;
+        const EBT = Math.exp(-2*LBT);
+        const BBT = 1 - EBT + 2*TB*((EBT*(LBT+0.5)) - 0.5);
+
+        const DUM = 1 + ((0.333 + (0.02/(LN**2)))*RTR);
+        const SWM = 1.5708*LN*DUM*(1 + 1/(8*LN**2));
+        const SWCYL = 3.1416*(LT-LN);
+        const SW = SWM+SWCYL;
+
+        const XMC =  1/Math.sqrt(1 + 0.552*TA**0.8);
+
+        const SSMC = 1 + 0.368 * (TA**1.85);
+
+        document.getElementById("table").innerHTML = "M\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0" +
+                                                      "CD0\xa0\xa0\xa0\xa0\xa0\xa0\xa0" +
+                                                      "CDH\xa0\xa0\xa0\xa0\xa0\xa0" +
+                                                      "CDSF\xa0\xa0\xa0\xa0\xa0" +
+                                                      "CDBND\xa0\xa0" +
+                                                      "CDBT\xa0\xa0\xa0\xa0\xa0" +
+                                                      "CDB\xa0\xa0\xa0\xa0\xa0\xa0" +
+                                                      "PB/P1<br>"
+        for(let ii=0; ii<M.length; ii++)
+        {
+            M2 = M[ii]**2;
+            CHI = (M2-1)/(2.4*M2);
+
+            // CDSF
+            RE = 23296.3*M[ii]*LT*DREF;
+            RET = 0.4343 * Math.log(RE);
+            CFT = (0.455/(RET**2.58))*((1 + 0.21*M2)**(-0.32));
+
+            if(BLC.localeCompare("L/T")==0)
+            {
+                CFL=(1.328/(Math.sqrt(RE))) * ((1+0.12*M2)**(-0.12));
+            }
+            if(BLC.localeCompare("T/T")==0)
+            {
+                CFL = CFT;
+            }
+
+            CDSFL = 1.2732*SW*CFL;
+            CDSFT = 1.2732*SW*CFT;
+            CDSF[ii] = (CDSFL * SWM + CDSFT * SWCYL)/SW;
+
+            // CDB, CDNBD, CDBT, CDH, PBP1
+            if(M[ii]<=1)
+            {
+                PTP = (1+0.2*M2)**3.5;
+            }
+            else
+            {
+                PTP = ((1.2*M2)**3.5)*((6/(7*M2-1))**2.5);
+            }
+            CMEP = (1.122*(PTP-1)*(DM**2))/M2;
+
+            if(M[ii] <= 0.91)
+            {
+                CDHM = 0;
+            }
+            else if(M[ii] >= 1.41)
+            {
+                CDHM = 0.85 * CMEP;
+            }
+            else
+            {
+                CDHM = (0.254+2.88*CHI)*CMEP;
+            }
+
+            if(M[ii] < 1)
+            {
+                PB2 = 1/(1 + 0.1875*M2 + 0.0531*M2**2);
+            }
+            else
+            {
+                PB2 = 1/(1 + 0.2477*M2 + 0.0345*M2**2);
+            }
+
+            PB4 = (1 + 0.09*M2*(1-Math.exp(LN-LT)))*(1 + 0.25*M2*(1-DB));
+            PBP1[ii] = PB2*PB4;
+            CDB[ii] = (1.4286*(1-PBP1[ii])*DB**2)/M2;
+
+            if(M[ii]<0.95)
+            {
+                CDBND[ii] = (M[ii]**12.5)*(DBND-1);
+            }
+            else
+            {
+                CDBND[ii] = (0.21+0.28/M2)*(DBND-1);
+            }
+
+            if(M[ii]<=1)
+            {
+                // Subsonic and transonic speeds
+                if(LBT <=0)
+                {
+                    CDBT[ii] = 0;
+                }
+                else
+                {
+                    if(M[ii] <= 0.85)
+                    {
+                        CDBT[ii] = 0;
+                    }
+                    else
+                    {
+                        CDBT[ii] = 2*TB23*BBT*(1/(0.564 + 1250*CHI**2));
+                    }
+                }
+
+                if(M[ii] <= XMC)
+                {
+                    CDHT = 0;
+                }
+                else
+                {
+                    CDHT = 0.368 * (TA**1.8) + 1.6 * TA * CHI;
+                }
+            }
+            else
+            {
+                //Supersonic speeds
+                BE2 = M2 - 1;
+                BE = Math.sqrt(BE2);
+                ZE = BE;
+
+                if(M[ii] < SSMC)
+                {
+                    ZE = Math.sqrt(SSMC**2-1);
+                }
+
+                RZ2 = 1./ZE**2;
+                CDHT = (C1 - C2*TA**2)*RZ2*((TA*ZE)**(C3+C4*TA));
+
+                if(LBT > 0)
+                {
+                    if(M[ii]<=1.1)
+                    {
+                        CDBT[ii] = 2*TB23*BBT*(1.774-9.3*CHI);
+                    }
+                    else
+                    {
+                        BB = 0.85 / BE;
+                        AA2 = (5 * TA)/(6*BE) + (0.5*TA)**2 - (0.7435 / M2) * ((TA*M[ii])**1.6);
+                        AA1 = (1 - ((0.6*RTR)/ M[ii])) * AA2;
+                        EXL = Math.exp(((-1.1952)/ M[ii]) * (LT - LN -LBT));
+                        XXM = ((2.4 * M2**2 - 4*BE2) * (TB**2)) / (2*BE2**2);
+                        AA = AA1 * EXL - XXM + ((2*TB)/ BE);
+                        RB = 1/BB;
+                        EXBT = Math.exp((-BB)*LBT);
+                        AAB = 1 - EXBT + (2*TB * (EXBT * (LBT + RB) - RB));
+                        CDBT[ii] = 4 * AA * TB * AAB * RB;
+                    }
+                }
+                else
+                {
+                    CDBT[ii] = 0;
+                }
+            }
+
+            CDH[ii] = CDHT + CDHM;
+
+            CD0[ii] = CDH[ii] + CDSF[ii] + CDBND[ii] + CDBT[ii] + CDB[ii];
+
+            if(M1.includes(M[ii])){
+                CD0_calc.push((Math.round(CD0[ii] * 1000) / 1000).toFixed(3) )
+            }
+
+            document.getElementById("table").innerHTML += M[ii].toFixed(2) + "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(CD0[ii] * 1000) / 1000).toFixed(3) +
+                                                                              "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(CDH[ii] * 1000) / 1000).toFixed(3) +
+                                                                              "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(CDSF[ii] * 1000) / 1000).toFixed(3) +
+                                                                              "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(CDBND[ii] * 1000) / 1000).toFixed(3) +
+                                                                              "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(CDBT[ii] * 1000) / 1000).toFixed(3) +
+                                                                              "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(CDB[ii] * 1000) / 1000).toFixed(3) +
+                                                                              "\xa0\xa0\xa0\xa0\xa0\xa0" + (Math.round(PBP1[ii] * 1000) / 1000).toFixed(3)
+            document.getElementById("table").innerHTML += "<br>"
+        }
+
+        var update = {
+            title: IDENT
+        };
+        Plotly.relayout(plotdiv, update);
+        Plotly.redraw(plotdiv);
+
+         bc();
+    }
+
+    function BRL1Example()
+    {
+        document.getElementById("DREF_field").value = 5.7;
+        document.getElementById("LT_field").value = 5.480;
+        document.getElementById("LN_field").value = 3.000;
+        document.getElementById("RTR_field").value = 0.50;
+        document.getElementById("LBT_field").value = 1.000;
+        document.getElementById("DB_field").value = 0.754;
+        document.getElementById("DM_field").value = 0.000;
+        document.getElementById("DBND_field").value = 1.000;
+        document.getElementById("XCG_field").value = 3.34;
+        document.getElementById("BLC_field").value = "L/T";
+        document.getElementById("IDENT_field").value = "BRL-1";
+
+        updateVarsFromFields();
+        updateSlidersFromFields();
+        mcdrag();
+
+    }
+
+    function minmanExample()
+    {
+        document.getElementById("DREF_field").value = 55.6;
+        document.getElementById("LT_field").value = 3.250;
+        document.getElementById("LN_field").value = 0.967;
+        document.getElementById("RTR_field").value = 0.00;
+        document.getElementById("LBT_field").value = 1.180;
+        document.getElementById("DB_field").value = 1.630;
+        document.getElementById("DM_field").value = 0.200;
+        document.getElementById("DBND_field").value = 1.000;
+        document.getElementById("XCG_field").value = 1.76;
+        document.getElementById("BLC_field").value = "T/T";
+        document.getElementById("IDENT_field").value = "Minuteman";
+
+        updateVarsFromFields();
+        updateSlidersFromFields();
+        mcdrag();
+
+    }
+
+    function M549Example()
+    {
+        updateVarsFromFields();
+        document.getElementById("DREF_field").value = 155;
+        document.getElementById("LT_field").value = 5.65;
+        document.getElementById("LN_field").value = 3.010;
+        document.getElementById("RTR_field").value = 0.5;
+        document.getElementById("LBT_field").value = 0.58;
+        document.getElementById("DB_field").value = 0.848;
+        document.getElementById("DM_field").value = 0.09;
+        document.getElementById("DBND_field").value = 1.020;
+        document.getElementById("XCG_field").value = 3.53;
+        document.getElementById("BLC_field").value = "T/T";
+        document.getElementById("IDENT_field").value = "M549";
+
+        updateVarsFromFields();
+        updateSlidersFromFields();
+        mcdrag();
+
+    }
+
+    function Lap338250_T()
+    {
+        updateVarsFromFields();
+        document.getElementById("DREF_field").value = 8.59;
+        document.getElementById("LT_field").value = 5.30;
+        document.getElementById("LN_field").value = 2.74;
+        document.getElementById("RTR_field").value = 0.93;
+        document.getElementById("LBT_field").value = 0.35;
+        document.getElementById("DB_field").value = 0.910;
+        document.getElementById("DM_field").value = 0.05;
+        document.getElementById("DBND_field").value = 1.0;
+        document.getElementById("XCG_field").value = 3.26;
+        document.getElementById("BLC_field").value = "L/T";
+        document.getElementById("IDENT_field").value = "Lap-338-250-CAWT";
+
+        updateVarsFromFields();
+        updateSlidersFromFields();
+        mcdrag();
+
+    }
+
+
+
+function bc(){
+
+        document.getElementById("table2").innerHTML = "M\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0" +
+                                                  "G1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0" +
+                                                  "G7" +
+                                                  "<br>";
+        for(let ii=0; ii<M1.length; ii++)
+        {
+
+        G1_1=CD0_calc[ii]/G1_CD[ii];
+        G7_1=CD0_calc[ii]/G7_CD[ii];
+        BC_G1=(WEIGHT/7000)/(Math.pow((Math.round((DREF/25.4) * 1000) / 1000), 2)*G1_1);
+        BC_G7=(WEIGHT/7000)/(Math.pow((Math.round((DREF/25.4) * 1000) / 1000), 2)*G7_1);
+
+        document.getElementById("table2").innerHTML += M1[ii].toFixed(2) + "\xa0\xa0\xa0\xa0\xa0\xa0" +
+                                                        BC_G1.toFixed(3) + "\xa0\xa0\xa0\xa0\xa0\xa0" +
+                                                        (Math.round(BC_G7 * 1000) / 1000).toFixed(3) +
+                                                        "<br>";
+        }
+
+}
+
+
+</script>
+
+</body>
+
+</html>
